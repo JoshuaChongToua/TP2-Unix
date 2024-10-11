@@ -55,3 +55,98 @@ Last login: Fri Oct 11 14:47:25 2024 from 10.20.0.18
 root@serveur-correction:~# 
 ```
 Avec la commande ssh -i id_rsa.pub root@10.20.0.143 sa nous permet de nous connecter avec la clé publique.
+
+## 1.5
+
+Avec la commande nano /etc/ssh/sshd_config on peut changer les éléments du fichier.
+On va y changer:
+- PermitRootLogin prohibit-password pour empecher l'authnetification root par mot de passe mais autorise l'accès par clé publique.
+- PasswordAuthention no pour desactiver l'authentification par mot de passe pour tous les utilisateurs.
+- PubkeyAuthentication yes pour s'assurer que l'authentification par clé est activée.
+
+
+## 2.1
+```bash
+root@serveur-correction:~# ps -eo user,pid,%cpu,%mem,stat,start,time,command
+USER         PID %CPU %MEM STAT  STARTED     TIME COMMAND
+```
+- Time correspond au temps durant lequel le CPU a été utilisé par le processus.
+- Le processus ayant le plus utilisé le processeur sur la machine est :
+  ```bash
+  root        1423  200  0.0 R+   15:37:36 00:00:00 ps -eo user,pid,%cpu,%mem,stat
+  ```
+- Le premier processus lancé après le démarrage du système est :
+  ```bash
+  root           1  0.0  0.1 Ss   14:05:39 00:00:02 /sbin/init
+  ```
+- La machine a été démarré à 14h05.
+- La commande uptime permet de savoir depuis combien de temps le seveur tourne:
+  ```bash
+  root@serveur-correction:~# uptime
+ 15:46:55 up  1:41,  2 users,  load average: 0,00, 0,00, 0,00
+  ```
+- La dernière ligne me renvoie 1423 dans la colonne PID donc depuis le démarrage de la machine il y a eu 1423 processus créés :
+```bash
+root        1423  200  0.0 R+   15:37:36 00:00:00 ps -eo user,pid,%cpu,%mem,stat
+```
+
+
+## 2.2
+
+Pour affichier le ppid avec la commande ps on peut faire : 
+```bash
+root@serveur-correction:~# ps -e -o pid,ppid,comm
+    PID    PPID COMMAND
+      1       0 systemd
+      2       0 kthreadd
+   1428       2 kworker/8:2-ata_sff
+```
+
+Pour obtenir la liste ordonnée de tous les processus ancêtres de la commande ps en cours d'exécution : 
+```bash
+root@serveur-correction:~# ps -eo pid,ppid --sort=ppid
+    PID    PPID
+      1       0
+      2       0
+      3       2
+      4       2
+      5       2
+```
+## 2.3
+
+Pour pouvoir installer pstree j'ai exécuter la commande apt install psmisc
+
+```bash
+root@serveur-correction:~# pstree
+systemd─┬─cron
+        ├─dbus-daemon
+        ├─dhclient
+        ├─login───bash
+        ├─sshd───sshd───bash───pstree
+        ├─systemd───(sd-pam)
+        ├─systemd-journal
+        ├─systemd-logind
+        ├─systemd-timesyn───{systemd-timesyn}
+        └─systemd-udevd
+```
+
+## 2.4
+
+Pour trier la liste de processus par occupation mémoire de façon décroissante on appuit sur 'M':
+```bash
+      1       0   0:02.23   0,0   0,1  20   0 S  163,8m  11,9m     0 systemd    
+   1409    1406   0:00.58   0,0   0,1  20   0 S   17,6m  10,8m     0 sshd       
+    623       1   0:00.14   0,0   0,1  20   0 S   18,4m  10,2m     0 systemd    
+   1406       1   0:00.01   0,0   0,1  20   0 S   15,1m   8,7m     0 sshd       
+    318       1   0:00.56   0,0   0,1  20   0 S   32,2m   8,5m     0 systemd-j+ 
+    564       1   0:00.25   0,0   0,1  20   0 S   24,8m   7,6m     0 systemd-l+
+```
+
+
+
+
+
+
+
+
+
