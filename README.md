@@ -1,7 +1,5 @@
 # TP2-Unix
 
-https://www.ipgp.fr/~lecocq/LicencePro-ProjetWeb/serveur-correction.ova
-
 
 ## 1.1
 
@@ -141,6 +139,108 @@ Pour trier la liste de processus par occupation mémoire de façon décroissante
     318       1   0:00.56   0,0   0,1  20   0 S   32,2m   8,5m     0 systemd-j+ 
     564       1   0:00.25   0,0   0,1  20   0 S   24,8m   7,6m     0 systemd-l+
 ```
+
+Pour trouver le processus le plus gourmand sur la machine en occupation mémoire est systemd: 
+```bash
+PID UTIL.     PR  NI    VIRT    RES    SHR S  %CPU  %MEM    TEMPS+ COM.     
+ 1 root      20   0  167544  11924   9048 S   0,0   0,1   0:01.71 systemd 
+```
+Systemd est le processus de démarrage principal sur linux. C'est le premier processus lancé par le noyau au démarrage de l'ordinateur. Il gère le démarrage et la gestion de tous les autres processus du système.
+
+En appuyant sur la touche "z", celle-ci nous permet d'activer ou désactiver l'affichage en couleur.
+
+En appuyant sur la touche "x", celle-ci nous permet de mettre en surbrillance la colonne sur laquelle les processus sont triés.
+
+En appuyant sur les touches "<" ou ">", celles-ci nous permettent de naviguer entre les colonnes et choisir celle que vous voulez trier.
+
+Avant de pouvoir utiliser la commande htop, j'ai du l'installer avec la commande apt install htop.
+
+Les avantages de la commande htop:
+- Meilleur inteface visuel(utilisation de couleur pour mieux différencier les processus.
+- La navigation est possible avec les touches fléchées.
+- Fontionnalité de recherche de processus par son nom.
+- Pouvoir trier les processus en cliquant diretement sur les colonnes.
+- htop permet l'affichage complet de la command tandis que top n'affiche que le nom du processus.
+
+Les inconvénients de la commande htop:
+- La commande n'est pas installée par défaut.
+- Moins fléxible pour les script, htop est plus orienté pour un usage interactif.
+
+## 3.
+
+Création des ficher script:
+```bash
+root@serveur-correction:~# cat>date.sh
+#!/bin/sh
+while true; do sleep 1; echo -n 'date '; date +%T; done
+```
+
+```bash
+root@serveur-correction:~# cat date-toto.sh 
+#!/bin/sh
+while true; do sleep 1; echo -n 'toto '; date --date '5 hour ago' +%T; done
+```
+
+Autoriser l'execution des fichiers :
+```bash
+root@serveur-correction:~# chmod +x date.sh
+root@serveur-correction:~# chmod +x date-toto.sh 
+```
+
+En exécutant le premier programme: 
+```bash
+root@serveur-correction:~# ./date.sh
+date 13:57:27
+date 13:57:28
+```
+
+En exécutant le deuxième script: 
+```bash
+root@serveur-correction:~# ./date-toto.sh 
+toto 08:58:15
+toto 08:58:16
+```
+La commande jobs nous permet d'affciher une liste de processus en arrière-plan:
+```bash
+root@serveur-correction:~# jobs
+[1]-  Stoppé                 ./date.sh
+[2]+  Stoppé                 ./date-toto.sh
+```
+
+En utilsant la commande fg %1 on va ramener le premier script au premier plan puis on pourra l'arreter avec ctrl+c.
+```bash
+root@serveur-correction:~# fg %1
+./date.sh
+date 14:00:57
+date 14:00:58
+date 14:00:59
+date 14:01:00
+date 14:01:01
+^C
+```
+Pareil pour le deuxième: 
+```bash
+root@serveur-correction:~# fg %2
+./date-toto.sh
+toto 09:02:36
+toto 09:02:37
+toto 09:02:38
+toto 09:02:39
+^C
+```
+Utilisation de la commande "ps" pour trouver les PID des scripts.
+```bash
+root@serveur-correction:~# ps
+    PID TTY          TIME CMD
+    650 pts/0    00:00:00 bash
+    960 pts/0    00:00:00 date.sh
+    967 pts/0    00:00:00 sleep
+    968 pts/0    00:00:00 date-toto.sh
+    971 pts/0    00:00:00 sleep
+    987 pts/0    00:00:00 ps
+
+```
+
 
 
 
