@@ -1,3 +1,4 @@
+
 # TP2-Unix
 
 
@@ -232,16 +233,106 @@ Utilisation de la commande "ps" pour trouver les PID des scripts.
 ```bash
 root@serveur-correction:~# ps
     PID TTY          TIME CMD
-    650 pts/0    00:00:00 bash
-    960 pts/0    00:00:00 date.sh
-    967 pts/0    00:00:00 sleep
-    968 pts/0    00:00:00 date-toto.sh
-    971 pts/0    00:00:00 sleep
-    987 pts/0    00:00:00 ps
-
+    645 pts/0    00:00:00 bash
+    649 pts/0    00:00:00 date.sh
+    658 pts/0    00:00:00 sleep
+    659 pts/0    00:00:00 date-toto.sh
+    678 pts/0    00:00:00 sleep
+    680 pts/0    00:00:00 ps
 ```
 
+Utilisation de la commande "kill -9 PID" pour forcé la terminaison du processus.
+```bash
+root@serveur-correction:~# kill -9 649
+root@serveur-correction:~# ps
+    PID TTY          TIME CMD
+    645 pts/0    00:00:00 bash
+    659 pts/0    00:00:00 date-toto.sh
+    678 pts/0    00:00:00 sleep
+    693 pts/0    00:00:00 ps
+```
 
+Le script date.sh va afficher la date au format HH:MM:SS tant que le script n'est pas interrompu manuelement.
+
+Le script date-toto.sh affiche l'heure mais cinq heure avang affichera et avec le mot "toto" devant.
+
+Les différences entre cat et tee sont que cat peut combiner plusieurs fichiers et leurs contenus tandis que tee peut écrire la sortie d'une commande dans un fichier tout en affichant la sortie à l'écran.
+
+## 4.
+
+La commande "ls | cat" permet de lister les fichiers et les répertoires dans le répertoire courant puis envoie la sortie à la commande cat.
+```bash
+root@serveur-correction:~# ls | cat
+date.sh
+date-toto.sh
+```
+
+La commande "ls -l | cat > liste" permet de créer un fichier "liste" et d'y enregistrer avec la commande "cat >" les détails, comme les permissions, le nombres de lien, le groupe, le propriétaire, la taille, la date et le nom, des fichiers que la commande ls -l va afficher dans le répertoire.
+```bash
+root@serveur-correction:~# ls -l | cat > liste
+root@serveur-correction:~# cat liste
+total 8
+-rwxr-xr-x 1 root root 66 14 oct.  13:49 date.sh
+-rwxr-xr-x 1 root root 86 14 oct.  13:53 date-toto.sh
+-rw-r--r-- 1 root root  0 14 oct.  16:48 liste
+root@serveur-correction:~# ls -l | tee liste
+```
+
+La commande ls -l | tee liste va faire la meme chose que la commande précédante cependant le contenu sera affiché à l'écran enregistré en meme temps .
+```bash
+root@serveur-correction:~# ls -l | tee liste
+total 12
+-rwxr-xr-x 1 root root  66 14 oct.  13:49 date.sh
+-rwxr-xr-x 1 root root  86 14 oct.  13:53 date-toto.sh
+-rw-r--r-- 1 root root 158 14 oct.  16:48 liste
+```
+
+La commande ls -l | tee liste | wc -l executera la meme chose que la commande précédente mais executera en plus ma commande wc -l qui va compter le nombre total de fichier/répertoires listés.
+```bash
+root@serveur-correction:~# ls -l | tee liste | wc -l
+4
+```
+## 5 
+
+Le service rsyslog n'était pas installer sur mon système donc je l'ai installer avec la commande "apt install rsyslog".
+
+Pour vérifier l'état du service on peut utiliser la commande :
+```bash
+root@serveur-correction:~# servive rsyslog status
+-bash: servive : commande introuvable
+root@serveur-correction:~# service rsyslog status
+● rsyslog.service - System Logging Service
+     Loaded: loaded (/lib/systemd/system/rsyslog.service; enabled; preset: enab>
+     Active: active (running) since Mon 2024-10-14 17:02:12 CEST; 41s ago
+TriggeredBy: ● syslog.socket
+       Docs: man:rsyslogd(8)
+             man:rsyslog.conf(5)
+             https://www.rsyslog.com/doc/
+   Main PID: 861 (rsyslogd)
+      Tasks: 4 (limit: 11878)
+     Memory: 1.3M
+        CPU: 16ms
+     CGroup: /system.slice/rsyslog.service
+             └─861 /usr/sbin/rsyslogd -n -iNONE
+
+oct. 14 17:02:12 serveur-correction systemd[1]: Starting rsyslog.service - Syst>
+oct. 14 17:02:12 serveur-correction rsyslogd[861]: imuxsock: Acquired UNIX sock>
+oct. 14 17:02:12 serveur-correction rsyslogd[861]: [origin software="rsyslogd" >
+oct. 14 17:02:12 serveur-correction systemd[1]: Started rsysl
+```
+A partir de la commande précedente, on peut voir que le PID est 861.
+
+Rsyslog enregistre les message système dans des fichiers spécifiques situés dans le répertoire /var/log.
+```bash
+root@serveur-correction:~# cd /var/log
+root@serveur-correction:/var/log# ls
+alternatives.log    btmp      dpkg.log.1  kern.log    README
+alternatives.log.1  btmp.1    faillog	  lastlog     runit
+apt		    cron.log  installer   lost+found  syslog
+auth.log	    dpkg.log  journal	  private     wtmp
+```
+
+Le service Cron est un utilitaire de planification de taches qui permet d'executer des scripts de manière automatique, il est essentiel pour l'automatisation des tâches répétitives et la gestion de la maintenance du système.
 
 
 
