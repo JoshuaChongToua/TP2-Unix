@@ -4,9 +4,24 @@
 
 ## 1.1
 
+Les éléments de la configuration ssh que nous avons du changer sont: 
+- PasswordAuthentication:
+  - yes : Permet l'authentification par mot de passe.
+  - no : Désactive l'authentification par mot de passe, n'autorisant que l'authentification par clé publique.
 
+    Avantage de no : renforce la sécurité en évitant les attaques par force brute sur les mots de passe.
+    Inconvénient de no : Les utilisateurs doivent obligatoirement utiliser une clé publique pour se connecter. 
+
+- PermitRootLogin:
+  - yes: Autorise la connexion SSH direct pour root
+  - no: Interdit toute connexion SSH direct pour root
+  - prohibit-password: Autorise root à se connecter uniquement par la clé publique.
+
+    Avantage de no : Empeche les attaques directes sur le compte root.
+    Inconvénient de no: Peut compliquer certaines opérations d'administration nécessitant root.
 
 ## 1.2
+Sans passphrase, une clé privée volée permettrait à un attaquant d'accéder immédiatement au serveur, car rien ne protège l'accès.
 
 ```bash
 root@serveur-correction:~# ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -q -N "" && ssh-copy-id root@10.20.0.143
