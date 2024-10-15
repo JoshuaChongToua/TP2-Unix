@@ -322,17 +322,84 @@ oct. 14 17:02:12 serveur-correction systemd[1]: Started rsysl
 ```
 A partir de la commande précedente, on peut voir que le PID est 861.
 
-Rsyslog enregistre les message système dans des fichiers spécifiques situés dans le répertoire /var/log.
+Rsyslog enregistre les messages issue des services standards dans le fichier /var/log/syslog.
 ```bash
-root@serveur-correction:~# cd /var/log
-root@serveur-correction:/var/log# ls
-alternatives.log    btmp      dpkg.log.1  kern.log    README
-alternatives.log.1  btmp.1    faillog	  lastlog     runit
-apt		    cron.log  installer   lost+found  syslog
-auth.log	    dpkg.log  journal	  private     wtmp
+root@serveur-correction:/var/log# cat syslog
+024-10-15T13:23:02.605491+02:00 serveur-correction systemd[1]: Started user@0.service - User Manager for UID 0.
+2024-10-15T13:23:02.607901+02:00 serveur-correction systemd[1]: Started session-1.scope - Session 1 of User root.
+2024-10-15T13:23:23.037731+02:00 serveur-correction systemd[1]: Started session-3.scope - Session 3 of User root.
+2024-10-15T13:23:23.089899+02:00 serveur-correction systemd[1]: systemd-fsckd.service: Deactivated successfully.
+2024-10-15T13:26:55.549689+02:00 serveur-correction dhclient[577]: DHCPREQUEST for 10.20.0.143 on enp0s3 to 10.20.0.253 port 67
+2024-10-15T13:26:55.561016+02:00 serveur-correction dhclient[577]: DHCPACK of 10.20.0.143 from 10.20.0.253
+2024-10-15T13:26:55.592723+02:00 serveur-correction dhclient[577]: bound to 10.20.0.143 -- renewal in 3307 seconds.
+
 ```
+La plupart des autres messages sont enregistrés dans auth.log, kern.log, mail.log.
 
 Le service Cron est un utilitaire de planification de taches qui permet d'executer des scripts de manière automatique, il est essentiel pour l'automatisation des tâches répétitives et la gestion de la maintenance du système.
+
+La commande tail -f affiche les dernières lignes d'un fichier et met à jour la sortie en temps réel au fur et à mesure que des nouvelles lignes sont ajoutées au fichier.
+
+```bash
+2024-10-15T13:43:55.424970+02:00 serveur-correction systemd[1]: Stopping cron.service - Regular background program processing daemon...
+2024-10-15T13:43:55.425459+02:00 serveur-correction systemd[1]: cron.service: Deactivated successfully.
+2024-10-15T13:43:55.425940+02:00 serveur-correction systemd[1]: Stopped cron.service - Regular background program processing daemon.
+2024-10-15T13:43:55.457651+02:00 serveur-correction systemd[1]: Started cron.service - Regular background program processing daemon.
+2024-10-15T13:43:55.461547+02:00 serveur-correction cron[727]: (CRON) INFO (pidfile fd = 3)
+2024-10-15T13:43:55.462407+02:00 serveur-correction cron[727]: (CRON) INFO (Skipping @reboot jobs -- not system startup)
+```
+En redémarrant le cron depuis un autre shell on peut voir que le sevice cron s'est arrêté puis à redémarré.
+
+Le fichier /etc/logrotate.conf est le fichier de configuration qui va permettre de gérer facilement les logs pour garantir des performances et une utilisation d'espace optimisés.
+
+
+```bash
+root@serveur-correction:~# dmesg
+   10.975226] audit: type=1400 audit(1728991372.535:7): apparmor="STATUS" operation="profile_load" profile="unconfined" name="man_groff" pid=552 comm="apparmor_parser"
+[   11.024063] audit: type=1400 audit(1728991372.583:8): apparmor="STATUS" operation="profile_load" profile="unconfined" name="/usr/lib/NetworkManager/nm-dhcp-client.action" pid=551 comm="apparmor_parser"
+[   11.024077] audit: type=1400 audit(1728991372.583:9): apparmor="STATUS" operation="profile_load" profile="unconfined" name="/usr/lib/NetworkManager/nm-dhcp-helper" pid=551 comm="apparmor_parser"
+[   11.024084] audit: type=1400 audit(1728991372.583:10): apparmor="STATUS" operation="profile_load" profile="unconfined" name="/usr/lib/connman/scripts/dhclient-script" pid=551 comm="apparmor_parser"
+```
+
+La commande dmesg | grep -i "cpu" permet de rechercher spécifiquement les informations sur le processeur dans le dmesg.
+
+```bash
+root@serveur-correction:~# dmesg | grep -i "cpu"
+[    0.001170] CPU MTRRs all blank - virtualized system.
+[    0.001925] ACPI: SSDT 0x00000000DFFF02F0 00036C (v01 VBOX   VBOXCPUT 00000002 INTL 20200925)
+[    0.012666] smpboot: Allowing 12 CPUs, 0 hotplug CPUs
+[    0.016152] setup_percpu: NR_CPUS:8192 nr_cpumask_bits:12 nr_cpu_ids:12 nr_node_ids:1
+[    0.016777] percpu: Embedded 61 pages/cpu s212992 r8192 d28672 u262144
+[    0.016783] pcpu-alloc: s212992 r8192 d28672 u262144 alloc=1*2097152
+[    0.016786] pcpu-alloc: [0] 00 01 02 03 04 05 06 07 [0] 08 09 10 11 -- -- -- -- 
+[    0.043782] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=12, Nodes=1
+[    0.050170] rcu: 	RCU restricting CPUs from NR_CPUS=8192 to nr_cpu_ids=12.
+[    0.050174] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=12
+[    0.072546] MDS: Mitigation: Clear CPU buffers
+[    0.194534] smpboot: CPU0: 12th Gen Intel(R) Core(TM) i7-12700 (family: 0x6, model: 0x97, stepping: 0x2)
+[    0.194664] Performance Events: unsupported p6 CPU model 151 no PMU driver, software events only.
+[    0.194958] smp: Bringing up secondary CPUs ...
+[    0.195019] .... node  #0, CPUs:        #1  #2  #3  #4  #5  #6  #7  #8  #9 #10 #11
+[    0.232737] smp: Brought up 1 node, 12 CPUs
+[    0.250791] cpuidle: using governor ladder
+[    0.250791] cpuidle: using governor menu
+[    0.937919] intel_pstate: CPU model not supported
+[    0.940205] ledtrig-cpu: registered to indicate activity on CPUs
+[    8.661550] cryptd: max_cpu_qlen set to 1000
+```
+
+Le modèle du processeur est Intel Core i7-12700 : 
+```bash
+[    0.194534] smpboot: CPU0: 12th Gen Intel(R) Core(TM) i7-12700 (family: 0x6, model: 0x97, stepping: 0x2)
+```
+La carte réseau détectée est Intel Pro/1000 Network Connection :  
+```bash
+root@serveur-correction:~# dmesg | grep -i "eth"
+[    2.085676] e1000 0000:00:03.0 eth0: (PCI:33MHz:32-bit) 08:00:27:ae:4e:31
+[    2.085683] e1000 0000:00:03.0 eth0: Intel(R) PRO/1000 Network Connection
+[    2.087985] e1000 0000:00:03.0 enp0s3: renamed from eth0
+```
+
 
 
 
